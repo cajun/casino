@@ -3,11 +3,11 @@ use std::time::SystemTime;
 
 /// Generation will contain and maintain the history of the game state.  It will keep this history
 /// in a tree structure.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Generation {
     state: GameState,
     timestamp: SystemTime,
-    children: Vec<Generation>,
+    children: Vec<Self>,
 }
 
 impl Default for Generation {
@@ -126,6 +126,16 @@ impl Generation {
     /// evaluating this will give the most up-to-date information on the game state.  If the
     /// history forks this method will still pull the most up-to-date generation until a new
     /// generation is created.
+    ///
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::{ Generation, GameState, Progress };
+    ///
+    /// let mut generation: Generation = Default::default();
+    ///
+    /// let current = generation.current_generation();
+    /// assert_eq!(current.branches()., &generation);
+    /// ```
     pub fn current_generation(&self) -> &Generation {
         if let Some(branch) = self.current_branch() {
             branch.current_generation()

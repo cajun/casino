@@ -2,7 +2,7 @@ use crate::{card::Card, deck::Deck, error::CardError, has_cards::HasCards};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Shoe {
     cards: Vec<Card>,
 }

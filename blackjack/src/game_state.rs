@@ -30,7 +30,7 @@ impl Default for Progress {
 
 /// GameState keeps track of the important things about the game.  As games are added this game
 /// state could be updated to include more generic items about that state.
-#[derive(Default, Clone, Debug)]
+#[derive(Default, Clone, Debug, PartialEq)]
 pub struct GameState {
     pub progress: Progress,
     pub house: House,
