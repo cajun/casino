@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+
+members = [
+	"blackjack",
+	"game",
+	"player",
+	"cards",
+	"ui"
+]
