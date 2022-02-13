@@ -4,10 +4,13 @@ use crate::{
     generation::Generation,
 };
 
-struct Rules {
+/// Rules will be the hub for blackjack.  In the future Traits "might" be broken out from this impl
+/// , but I'm not sure at the momentA.
+pub struct Rules {
     generation: Generation,
 }
 
+/// A default rule will have the game in the starting state
 impl Default for Rules {
     fn default() -> Self {
         Self {
@@ -19,7 +22,18 @@ impl Default for Rules {
 impl Rules {
     /// add_player will add a new player to the table.   The current state must be in starting for
     /// this action to be done.
-    fn add_player(&mut self) -> Result<(), RuleError> {
+    ///
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::Rules;
+    ///
+    /// let mut rule: Rules = Default::default();
+    /// rule.add_player();
+    /// rule.add_player();
+    ///
+    /// assert_eq!(2, rule.current_state().players.len());
+    /// ```
+    pub fn add_player(&mut self) -> Result<(), RuleError> {
         if !self.is_starting() {
             return Err(RuleError::InvalidState(self.current_progress()));
         }
@@ -33,7 +47,19 @@ impl Rules {
 
     /// Change the state from starting to playing.   This should only occur when the game state is
     /// in the starting state.
-    fn start_playing(&mut self) -> Result<(), RuleError> {
+    ///
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::{ Progress, Rules };
+    ///
+    /// let mut rule: Rules = Default::default();
+    /// rule.add_player();
+    /// rule.add_player();
+    /// assert!(rule.start_playing().is_ok());
+    ///
+    /// assert_eq!(&Progress::Playing, rule.current_progress());
+    /// ```
+    pub fn start_playing(&mut self) -> Result<(), RuleError> {
         if !self.is_starting() {
             return Err(RuleError::InvalidState(self.current_progress()));
         }
@@ -45,7 +71,21 @@ impl Rules {
         Ok(())
     }
 
-    fn done_playing(&mut self) -> Result<(), RuleError> {
+    /// This will mark the game as done playing
+    ///
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::{ Progress, Rules };
+    ///
+    /// let mut rule: Rules = Default::default();
+    /// rule.add_player();
+    /// rule.add_player();
+    /// assert!(rule.start_playing().is_ok());
+    /// assert!(rule.done_playing().is_ok());
+    ///
+    /// assert_eq!(&Progress::Done, rule.current_progress());
+    /// ```
+    pub fn done_playing(&mut self) -> Result<(), RuleError> {
         if !self.is_playing() {
             return Err(RuleError::InvalidState(self.current_progress()));
         }
@@ -57,28 +97,97 @@ impl Rules {
         Ok(())
     }
 
-    /// Check the the current progress of the blackjack game.
-    fn current_progress(&self) -> &Progress {
+    /// This will create a new game, but only after the current game is done
+    ///
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::{ Progress, Rules };
+    ///
+    /// let mut rule: Rules = Default::default();
+    /// rule.add_player();
+    /// rule.add_player();
+    /// assert!(rule.start_playing().is_ok());
+    /// assert!(rule.done_playing().is_ok());
+    /// assert!(rule.new_game().is_ok());
+    ///
+    /// assert_eq!(&Progress::Starting, rule.current_progress());
+    /// ```
+    pub fn new_game(&mut self) -> Result<(), RuleError> {
+        if !self.is_done() {
+            return Err(RuleError::InvalidState(self.current_progress()));
+        }
+
+        let mut gs = self.current_state().clone();
+
+        gs.progress = Progress::Starting;
+        self.generation.add_generation(gs);
+        Ok(())
+    }
+
+    /// Check the current progress of the blackjack game.
+    ///
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::{ Progress, Rules };
+    ///
+    /// let rule: Rules = Default::default();
+    ///
+    /// assert_eq!(&Progress::Starting, rule.current_progress());
+    pub fn current_progress(&self) -> &Progress {
         &self.current_state().progress
     }
 
     /// is_starting is a check to determine if the game is in the starting state.
-    fn is_starting(&self) -> bool {
+    /// Check the current progress of the blackjack game.
+    ///
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::Rules;
+    ///
+    /// let rule: Rules = Default::default();
+    ///
+    /// assert_eq!(true, rule.is_starting());
+    /// assert_eq!(false, rule.is_playing());
+    /// assert_eq!(false, rule.is_done());
+    pub fn is_starting(&self) -> bool {
         self.current_progress() == &Progress::Starting
     }
 
     /// is_playing is a check to determine if the game is in the playing state.
-    fn is_playing(&self) -> bool {
+    ///
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::Rules;
+    ///
+    /// let mut rule: Rules = Default::default();
+    /// assert!(rule.start_playing().is_ok());
+    ///
+    /// assert_eq!(false, rule.is_starting());
+    /// assert_eq!(true, rule.is_playing());
+    /// assert_eq!(false, rule.is_done());
+    pub fn is_playing(&self) -> bool {
         self.current_progress() == &Progress::Playing
     }
 
     /// is_done is a check to determine if the game is in the done state.
-    fn is_done(&self) -> bool {
+    ///
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::Rules;
+    ///
+    /// let mut rule: Rules = Default::default();
+    /// assert!(rule.start_playing().is_ok());
+    /// assert!(rule.done_playing().is_ok());
+    ///
+    /// assert_eq!(false, rule.is_starting());
+    /// assert_eq!(false, rule.is_playing());
+    /// assert_eq!(true, rule.is_done());
+    pub fn is_done(&self) -> bool {
         self.current_progress() == &Progress::Done
     }
 
     /// current_state pull the current state of the game.
-    fn current_state(&self) -> &GameState {
+    pub fn current_state(&self) -> &GameState {
         self.generation.current_state()
     }
 }

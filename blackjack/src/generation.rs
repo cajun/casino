@@ -121,7 +121,7 @@ impl Generation {
     /// evaluating this will give the most up-to-date information on the game state.  If the
     /// history forks this method will still pull the most up-to-date generation until a new
     /// generation is created.
-    pub fn current_generation(&self) -> &Self {
+    pub fn current_generation(&self) -> &Generation {
         if let Some(branch) = self.current_branch() {
             branch.current_generation()
         } else {
