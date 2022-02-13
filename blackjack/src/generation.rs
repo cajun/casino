@@ -7,7 +7,7 @@ use std::time::SystemTime;
 pub struct Generation {
     state: GameState,
     timestamp: SystemTime,
-    children: Vec<Box<Generation>>,
+    children: Vec<Generation>,
 }
 
 impl Default for Generation {
@@ -33,9 +33,14 @@ impl Generation {
         }
     }
 
+    /// append_generation will take in a new GameState and append it to the current list of states
+    /// on this generation.  Right now this is a private method.  It is possible to create trees of
+    /// generations using this method.
+    ///
+    /// * `state`: GameState to be added to this generation
     pub(super) fn append_generation(&mut self, state: GameState) {
         let generation = Generation::new(state);
-        self.children.push(Box::new(generation));
+        self.children.push(generation);
     }
 
     /// Add a new GameState to the list of game states on this generation.  This will allow each
@@ -90,7 +95,7 @@ impl Generation {
     ///
     /// assert_eq!(1, generation.branches().len());
     /// ```
-    pub fn branches(&self) -> &Vec<Box<Generation>> {
+    pub fn branches(&self) -> &Vec<Generation> {
         &self.children
     }
 
@@ -111,7 +116,7 @@ impl Generation {
     /// let current_branch = generation.current_branch().unwrap();
     /// assert_eq!(Progress::Done, current_branch.current_state().progress);
     /// ```
-    pub fn current_branch(&self) -> Option<&Box<Self>> {
+    pub fn current_branch(&self) -> Option<&Self> {
         self.children
             .iter()
             .max_by(|a, b| a.timestamp.cmp(&b.timestamp))
@@ -130,7 +135,7 @@ impl Generation {
     }
 
     /// Return a mutable branch.  This will default to the current branch.
-    fn mut_current_branch(&mut self) -> Option<&mut Box<Self>> {
+    fn mut_current_branch(&mut self) -> Option<&mut Self> {
         self.children
             .iter_mut()
             .max_by(|a, b| a.timestamp.cmp(&b.timestamp))

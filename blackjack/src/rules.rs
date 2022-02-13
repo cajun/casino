@@ -187,6 +187,16 @@ impl Rules {
     }
 
     /// current_state pull the current state of the game.
+    /// Example:
+    /// ```
+    /// use blackjack::prelude::{ Progress, Rules };
+    ///
+    /// let mut rule: Rules = Default::default();
+    /// let game_state = rule.current_state();
+    ///
+    /// assert!(game_state.players.is_empty());
+    /// assert_eq!(Progress::Starting, game_state.progress);
+    ///
     pub fn current_state(&self) -> &GameState {
         self.generation.current_state()
     }
