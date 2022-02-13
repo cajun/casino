@@ -1,6 +1,8 @@
 use cards::prelude::Shoe;
 use player::{House, Player};
 
+/// Progress will let you know where you are in the game.  It will help enforce that certain
+/// actions can only occur when the game is in a given state.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Progress {
     Starting,
@@ -8,6 +10,7 @@ pub enum Progress {
     Done,
 }
 
+/// Prrogress needs a standard way to be printed out.  That's what Display is for.
 impl std::fmt::Display for Progress {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -18,13 +21,16 @@ impl std::fmt::Display for Progress {
     }
 }
 
+/// When creating a Progress there should be a starting point.
 impl Default for Progress {
     fn default() -> Self {
         Progress::Starting
     }
 }
 
-#[derive(Default, Clone)]
+/// GameState keeps track of the important things about the game.  As games are added this game
+/// state could be updated to include more generic items about that state.
+#[derive(Default, Clone, Debug)]
 pub struct GameState {
     pub progress: Progress,
     pub house: House,
