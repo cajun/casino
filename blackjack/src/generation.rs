@@ -3,7 +3,7 @@ use std::time::SystemTime;
 
 /// Generation will contain and maintain the history of the game state.  It will keep this history
 /// in a tree structure.
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Generation {
     state: GameState,
     timestamp: SystemTime,
@@ -134,7 +134,6 @@ impl Generation {
     /// let mut generation: Generation = Default::default();
     ///
     /// let current = generation.current_generation();
-    /// assert_eq!(current.branches()., &generation);
     /// ```
     pub fn current_generation(&self) -> &Generation {
         if let Some(branch) = self.current_branch() {
@@ -158,7 +157,7 @@ impl Generation {
         }
 
         self.mut_current_branch()
-            .expect("There are children")
+            .expect("If there are children then there must be a current branch")
             .mut_current_generation()
     }
 
@@ -192,11 +191,49 @@ impl Generation {
 #[cfg(test)]
 mod test {
     use super::Generation;
+    use crate::game_state::{GameState, Progress};
 
     #[test]
     fn can_add_a_generation() {
         let mut generation: Generation = Default::default();
         generation.add_generation(Default::default());
         assert_eq!(1, generation.number_of_branches());
+    }
+
+    #[test]
+    fn can_add_a_custom_game_state_to_a_generation() {
+        let gs: GameState = Default::default();
+        let generation = Generation::new(gs);
+
+        assert_eq!(0, generation.number_of_branches());
+        assert_eq!(Progress::Starting, generation.state.progress);
+    }
+
+    #[test]
+    fn can_get_the_current_branch() {
+        let mut generation: Generation = Default::default();
+
+        assert_eq!(0, generation.number_of_branches());
+
+        let gs = GameState {
+            players: vec![Default::default()],
+            ..Default::default()
+        };
+
+        generation.append_generation(gs);
+
+        assert_eq!(1, generation.number_of_branches());
+
+        let gs2 = GameState {
+            players: vec![Default::default(), Default::default()],
+            ..Default::default()
+        };
+        generation.append_generation(gs2);
+
+        assert_eq!(2, generation.number_of_branches());
+
+        let maybe = generation.current_branch();
+        assert!(maybe.is_some());
+        assert_eq!(2, maybe.unwrap().state.players.len());
     }
 }

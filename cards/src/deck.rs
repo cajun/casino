@@ -6,7 +6,7 @@ use crate::{
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Deck {
     pub(crate) cards: Vec<Card>,
 }
